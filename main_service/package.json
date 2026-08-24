@@ -1,0 +1,19 @@
+{
+  "name": "webjs",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@0gfoundation/0g-storage-ts-sdk": "^1.2.11",
+    "ethers": "^6.13.1",
+    "express": "^5.2.1",
+    "multer": "^2.2.0",
+    "openai": "^7.5.0"
+  }
+}

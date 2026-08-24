@@ -23,7 +23,7 @@ This service provides vector-based semantic search capabilities using:
 
 ### Prerequisites
 
-- Python 3.7 or higher
+- Python 3.12 or higher
 - pip (Python package manager)
 
 ### Setup

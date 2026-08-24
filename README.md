@@ -175,11 +175,11 @@ PRIVATE_KEY=0xYOUR_KEY npx hardhat run scripts/deploy.js --network mainnet
 
 ## Video
 
-📺 [https://www.youtube.com/watch?v=YhE2h9Fs-Mo](Youtube Video)
+📺 [Youtube Video](https://www.youtube.com/watch?v=YhE2h9Fs-Mo)
 
 ## Public post
 
-🐦 [https://x.com/buildlabz/status/2091993829536571395](x.com post)
+🐦 [x post](https://x.com/buildlabz/status/2091993829536571395)
 
 ## License
 

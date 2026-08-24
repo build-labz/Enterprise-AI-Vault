@@ -17,6 +17,13 @@ The `AddressStorage` contract enables a single owner to store and retrieve arbit
 
 ## How to Deploy
 
+Install dependencies:
+
+```bash
+npm install
+```
+
+
 Deploy on testnet:
 
 ```bash

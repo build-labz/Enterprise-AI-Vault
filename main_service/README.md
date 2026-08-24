@@ -1,4 +1,4 @@
-# 0G AI Storage & Chat Server
+# Enterprise-AI-Vault Main Service
 
 A complete server implementation that integrates file storage on the 0G decentralized storage network with AI-powered querying capabilities. This system allows users to upload text files, split them into chunks, store them on 0G Storage Network, and then query the stored content using an AI assistant.
 

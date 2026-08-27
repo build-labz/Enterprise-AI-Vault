@@ -186,6 +186,7 @@ app.post('/chat', async(req, res) => {
         var foundChunkData = "";
 
         const responseData = await response.json();
+        console.log("responseData: ", responseData);
         var i;
         for (i=0; i<responseData.results.length; i++) {
             const chunkData = responseData.results[i];
@@ -193,14 +194,23 @@ app.post('/chat', async(req, res) => {
             const rootHash = chunkData.chunk_hash;
             const blob = await downloadFromIndexerToBlob(rootHash);
             const item = await blob.text();
-            foundChunkData += item;
+            foundChunkData += item + ` (Reference: ${chunkData.filename}#${chunkData.chunk_number})\n`;
+            console.log("item: ", item);
         }
+
+        console.log("info: ", { role: "user", content: foundChunkData + "\n\n" + text });
 
         const llmResponse = await client.chat.completions.create({
             model: "0gm-1.0-35b-a3b",
             messages: [
-                { role: "system", content: "You are a helpful assistant." },
-                { role: "user", content: foundChunkData + "\n\n" + text }
+                { 
+                    role: "system", 
+                    content: "Answer using ONLY the provided context with the corresponding reference. Be brief (max 3 sentences). If unknown, say 'I don't know. Please also mention the reference in parenthesis.'" 
+                },
+                { 
+                    role: "user", 
+                    content: "Context: " + foundChunkData + "\n\nQuestion: " + text 
+                }
             ],
             stream: false,
             chat_template_kwargs: { enable_thinking: false },

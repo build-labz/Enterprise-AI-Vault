@@ -1,582 +1,1128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Enterprise AI Vault</title>
-    <!-- Font Awesome 6 (free) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise AI Vault - Decentralized Document Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
+        :root {
+            --primary: #6C5CE7;
+            --primary-light: #A29BFE;
+            --secondary: #00D2FF;
+            --accent: #FF6B9D;
+            --dark-bg: #0A0E27;
+            --card-bg: rgba(20, 25, 50, 0.8);
+            --text-primary: #FFFFFF;
+            --text-secondary: #B8C5D6;
+            --border: rgba(108, 92, 231, 0.3);
+            --success: #00E676;
+            --gradient-1: linear-gradient(135deg, #6C5CE7 0%, #00D2FF 100%);
+            --gradient-2: linear-gradient(135deg, #FF6B9D 0%, #6C5CE7 100%);
         }
 
         body {
-            background: linear-gradient(145deg, #f6f9fc 0%, #e9f0f5 100%);
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1.5rem;
+            overflow-x: hidden;
+            position: relative;
         }
 
-        /* chat card – clean, glassmorphism */
-        .chat-container {
-            max-width: 780px;
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 2.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 2px 8px 0 rgba(0,0,0,0.06);
-            padding: 2rem 1.8rem 1.8rem;
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
         }
 
-        /* header */
-        .chat-header {
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(108, 92, 231, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 210, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 107, 157, 0.1) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(-30px, -30px) rotate(120deg); }
+            66% { transform: translate(30px, -20px) rotate(240deg); }
+        }
+
+        /* Grid Pattern Overlay */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(108, 92, 231, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(108, 92, 231, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        /* Header */
+        header {
+            padding: 2rem 4rem;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 0.5rem 1rem;
-            margin-bottom: 1.8rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 2px solid rgba(0, 0, 0, 0.04);
+            align-items: center;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
         }
 
-        .header-left {
+        .logo {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
         }
 
-        .header-left i {
-            font-size: 2rem;
-            color: #2a7de1;
-            background: rgba(42, 125, 225, 0.08);
-            padding: 0.5rem;
-            border-radius: 1rem;
-        }
-
-        .header-left h1 {
-            font-weight: 600;
-            font-size: 1.6rem;
-            letter-spacing: -0.3px;
-            color: #1c2e3f;
-            display: flex;
-            align-items: baseline;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .header-left .badge {
-            background: #d4e2f0;
-            color: #1f3a57;
-            font-size: 0.7rem;
-            font-weight: 500;
-            padding: 0.2rem 0.9rem;
-            border-radius: 30px;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-        }
-
-        /* restart button – manual reset */
-        .restart-btn {
-            background: rgba(220, 235, 245, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            color: #1f3a57;
-            padding: 0.5rem 1.2rem;
-            border-radius: 40px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            backdrop-filter: blur(4px);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-        }
-        .restart-btn i {
-            font-size: 0.9rem;
-        }
-        .restart-btn:hover {
-            background: #2a7de1;
-            border-color: #2a7de1;
-            color: white;
-            box-shadow: 0 8px 16px rgba(42, 125, 225, 0.15);
-            transform: scale(0.97);
-        }
-        .restart-btn:active {
-            transform: scale(0.93);
-        }
-        .restart-btn:disabled {
-            opacity: 0.4;
-            pointer-events: none;
-            filter: grayscale(0.4);
-        }
-
-        /* chat messages – scrollable */
-        .chat-messages {
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 1.8rem;
-            padding: 1.5rem 1.2rem;
-            min-height: 280px;
-            max-height: 400px;
-            overflow-y: auto;
-            margin-bottom: 1.5rem;
-            box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            display: flex;
-            flex-direction: column;
-            gap: 1.2rem;
-        }
-
-        .chat-messages::-webkit-scrollbar {
-            width: 5px;
-        }
-        .chat-messages::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.02);
-            border-radius: 10px;
-        }
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: #b6ccdd;
-            border-radius: 10px;
-        }
-
-        /* message bubbles */
-        .message {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.7rem;
-            animation: fadeSlide 0.25s ease;
-        }
-
-        .message.user {
-            flex-direction: row-reverse;
-        }
-
-        .message .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 40px;
-            background: #d9e2ed;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            color: #1f3a57;
-            font-size: 1.1rem;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-        }
-
-        .message.user .avatar {
-            background: #2a7de1;
-            color: white;
-        }
-
-        .bubble {
-            background: white;
-            padding: 0.9rem 1.3rem;
-            border-radius: 1.8rem;
-            border-top-left-radius: 0.6rem;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03);
-            max-width: 80%;
-            word-break: break-word;
-            line-height: 1.5;
-            color: #1c2e3f;
-            font-size: 0.98rem;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(2px);
-        }
-
-        .message.user .bubble {
-            background: #2a7de1;
-            color: white;
-            border-top-right-radius: 0.6rem;
-            border-top-left-radius: 1.8rem;
-            border-color: #1a5fb0;
-            box-shadow: 0 4px 12px rgba(42, 125, 225, 0.15);
-        }
-
-        /* typing indicator */
-        .typing-indicator {
-            display: none;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.4rem 0 0.2rem 0.5rem;
-            color: #48647c;
-            font-size: 0.9rem;
-        }
-        .typing-indicator .dots span {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #6f8da5;
-            border-radius: 20px;
-            margin-right: 4px;
-            animation: pulse 1.2s infinite ease-in-out;
-        }
-        .typing-indicator .dots span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator .dots span:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes pulse {
-            0%, 60%, 100% { opacity: 0.2; transform: scale(0.9); }
-            30% { opacity: 1; transform: scale(1.1); }
-        }
-
-        @keyframes fadeSlide {
-            0% { opacity: 0; transform: translateY(10px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-
-        /* input area */
-        .input-area {
-            display: flex;
-            gap: 0.6rem;
-            align-items: center;
-            background: white;
-            padding: 0.4rem 0.4rem 0.4rem 1.2rem;
-            border-radius: 50px;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.02);
-            border: 1px solid rgba(0, 0, 0, 0.04);
-            background: rgba(255,255,255,0.7);
-            backdrop-filter: blur(4px);
-            transition: border 0.2s, box-shadow 0.2s;
-        }
-        .input-area:focus-within {
-            border-color: #2a7de1;
-            box-shadow: 0 8px 20px rgba(42, 125, 225, 0.08);
-            background: white;
-        }
-
-        .input-area input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            padding: 0.9rem 0;
-            font-size: 1rem;
-            color: #1c2e3f;
-            outline: none;
-        }
-        .input-area input::placeholder {
-            color: #8ba1b5;
-            font-weight: 300;
-        }
-
-        .input-area button {
-            background: #2a7de1;
-            border: none;
-            color: white;
+        .logo-icon {
             width: 50px;
             height: 50px;
-            border-radius: 50px;
-            font-size: 1.2rem;
+            background: var(--gradient-1);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 0 30px rgba(108, 92, 231, 0.5);
+        }
+
+        .logo-text h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-1);
+            transition: width 0.3s;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .btn-primary {
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-1);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-            box-shadow: 0 6px 14px rgba(42, 125, 225, 0.25);
-            border: 1px solid rgba(255,255,255,0.15);
-        }
-        .input-area button:hover {
-            background: #1f65c7;
-            transform: scale(0.96);
-        }
-        .input-area button:active {
-            background: #1553a8;
-            transform: scale(0.92);
-        }
-        .input-area button:disabled {
-            opacity: 0.5;
-            pointer-events: none;
-            box-shadow: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
         }
 
-        /* helper text */
-        .reset-hint {
-            margin-top: 1rem;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(108, 92, 231, 0.6);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 4rem;
+        }
+
+        /* Hero Section */
+        .hero {
             text-align: center;
-            color: #6c889e;
-            font-size: 0.78rem;
-            letter-spacing: 0.2px;
+            margin-bottom: 4rem;
+        }
+
+        .hero h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .features {
             display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 0.4rem;
-            opacity: 0.8;
-        }
-        .reset-hint i {
-            font-size: 0.7rem;
-            color: #6f8da5;
+            gap: 3rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
         }
 
-        /* empty state */
-        .empty-state {
-            color: #7d98af;
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--gradient-1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        /* Main Content Grid */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--primary-light);
+            box-shadow: 0 12px 48px rgba(108, 92, 231, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-1);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 0 20px rgba(108, 92, 231, 0.4);
+        }
+
+        .card-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .card-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+
+        /* Upload Section */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 15px;
+            padding: 3rem 2rem;
             text-align: center;
-            padding: 2rem 1rem 1.2rem;
-            font-weight: 300;
-            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-zone::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-1);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary);
+            transform: scale(1.02);
+        }
+
+        .upload-zone:hover::before {
+            opacity: 0.05;
+        }
+
+        .upload-zone.drag-over {
+            border-color: var(--secondary);
+            background: rgba(0, 210, 255, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .upload-hint {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            opacity: 0.7;
+            position: relative;
+            z-index: 1;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-info {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(108, 92, 231, 0.1);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            display: none;
+        }
+
+        .file-info.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-size {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(108, 92, 231, 0.2);
+            border-radius: 3px;
+            margin-top: 1rem;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar.show {
+            display: block;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-1);
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 3px;
+        }
+
+        .upload-status {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: none;
+        }
+
+        .upload-status.show {
+            display: block;
+        }
+
+        .upload-status.success {
+            color: var(--success);
+        }
+
+        .upload-status.error {
+            color: var(--accent);
+        }
+
+        /* Chat Section */
+        .chat-container {
             display: flex;
             flex-direction: column;
-            gap: 0.3rem;
-            align-items: center;
-        }
-        .empty-state i {
-            font-size: 2.4rem;
-            opacity: 0.3;
-            margin-bottom: 0.4rem;
-            color: #2a7de1;
+            height: 500px;
         }
 
-        @media (max-width: 480px) {
-            .chat-container { padding: 1.2rem; }
-            .bubble { max-width: 90%; }
-            .chat-header { flex-direction: column; align-items: stretch; }
-            .header-left h1 { font-size: 1.3rem; }
-            .restart-btn { justify-content: center; }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: rgba(10, 14, 39, 0.5);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .chat-message {
+            margin-bottom: 1rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-bubble {
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+
+        .message-user {
+            background: var(--gradient-1);
+            margin-left: auto;
+            color: white;
+        }
+
+        .message-ai {
+            background: rgba(108, 92, 231, 0.15);
+            border: 1px solid var(--border);
+            margin-right: auto;
+        }
+
+        .message-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 1rem 1.2rem;
+            background: rgba(10, 14, 39, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(108, 92, 231, 0.3);
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        .send-btn {
+            padding: 1rem 2rem;
+            background: var(--gradient-1);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(108, 92, 231, 0.5);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 1rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .typing-indicator.show {
+            display: block;
+        }
+
+        /* On-chain Badge */
+        .onchain-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 230, 118, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--success);
+            margin-top: 1rem;
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 4rem;
+            margin-top: 4rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-link:hover {
+            color: var(--primary-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            header {
+                padding: 1.5rem 2rem;
+            }
+            
+            .container {
+                padding: 2rem;
+            }
+            
+            .hero h2 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .features {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .chat-input-container {
+                flex-direction: column;
+            }
+            
+            .send-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Glow Effect */
+        .glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .glow-1 {
+            background: var(--primary);
+            top: 10%;
+            left: 10%;
+        }
+
+        .glow-2 {
+            background: var(--secondary);
+            bottom: 10%;
+            right: 10%;
         }
     </style>
 </head>
 <body>
-<div class="chat-container">
-    <!-- header with manual restart button -->
-    <div class="chat-header">
-        <div class="header-left">
-            <i class="fas fa-comment-dots"></i>
-            <h1>
-                Enterprise AI Vault
-                <span class="badge">Trust + AI</span>
-            </h1>
-        </div>
-        <button class="restart-btn" id="restartBtn" title="Clear chat & start fresh">
-            <i class="fas fa-rotate-left"></i> Restart
-        </button>
-    </div>
+    <!-- Background Effects -->
+    <div class="bg-animation"></div>
+    <div class="grid-overlay"></div>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
 
-    <!-- chat messages -->
-    <div class="chat-messages" id="chatMessages">
-        <div class="empty-state" id="emptyState">
-            <i class="fas fa-arrow-right-to-bracket"></i>
-            <span>Secure your information, then search inside it.</span>
-            <span style="font-size:0.8rem; opacity:0.6;">Currently, only one question &amp; one reply per turn.</span>
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <div class="logo-icon">🔐</div>
+            <div class="logo-text">
+                <h1>Enterprise AI Vault</h1>
+                <p>Decentralized Document Intelligence</p>
+            </div>
         </div>
-        <div class="typing-indicator" id="typingIndicator">
-            <span style="opacity:0.6;">0gm-1.0-35b-a3b</span>
-            <div class="dots">
-                <span></span><span></span><span></span>
+        <nav class="nav-links">
+            <a href="#" class="nav-link">Documentation</a>
+            <a href="https://github.com/build-labz/Enterprise-AI-Vault" class="nav-link">GitHub</a>
+            <a href="#" class="nav-link">Live Demo</a>
+<!--
+            <button class="btn-primary">Connect Wallet</button>
+-->
+        </nav>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h2>Store. Encrypt. Query.</h2>
+            <p>Your documents on decentralized storage, powered by AI. Every reference anchored on-chain for complete transparency and trust.</p>
+            <div class="features">
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>0G Decentralized Storage</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>On-Chain Verification</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>AI-Powered Search</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>Asymmetric Encryption</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Upload Section -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📄</div>
+                    <div>
+                        <div class="card-title">Upload Document</div>
+                        <div class="card-subtitle">Text (.txt) files up to 10MB</div>
+                    </div>
+                </div>
+
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">☁️</div>
+                    <div class="upload-text">Drag & drop your text (*.txt) file here</div>
+                    <div class="upload-hint">or click to browse (max 10MB)</div>
+                    <input type="file" class="file-input" id="fileInput" accept=".txt,.md">
+                </div>
+
+                <div class="file-info" id="fileInfo">
+                    <div class="file-name">
+                        <span>📎</span>
+                        <span id="fileName">document.txt</span>
+                    </div>
+                    <div class="file-size" id="fileSize">2.5 MB</div>
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    
+                </div>
+                
+                <div class="upload-status" id="uploadStatus"></div>
+
+                <div class="onchain-badge" id="onchainBadge" style="display: none;">
+                    <div class="badge-dot"></div>
+                    <span>Anchored on 0G Chain</span>
+                </div>
+            </div>
+
+            <!-- Chat Section -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🤖</div>
+                    <div>
+                        <div class="card-title">AI Assistant</div>
+                        <div class="card-subtitle">Ask questions about your documents</div>
+                    </div>
+                </div>
+
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="chat-message">
+                            <div class="message-label">AI Assistant</div>
+                            <div class="message-bubble message-ai">
+                                Hello! Upload some documents and ask me anything about it. I'll search through the encrypted chunks stored on 0G and provide accurate answers.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="typing-indicator" id="typingIndicator">
+                        AI is thinking...
+                    </div>
+
+                    <div class="chat-input-container">
+                        <input 
+                            type="text" 
+                            class="chat-input" 
+                            id="chatInput" 
+                            placeholder="Ask a question about your document..."
+                            
+                        >
+                        <button class="send-btn" id="sendBtn" >
+                            <span>Send</span>
+                            <span>→</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- input area -->
-    <div class="input-area">
-        <input type="text" id="userInput" placeholder="Type your question…" autofocus />
-        <button id="sendBtn" aria-label="Send">
-            <i class="fas fa-paper-plane"></i>
-        </button>
-    </div>
-    <div class="reset-hint">
-        <i class="fas fa-hand-pointer"></i>
-        <span>Click <strong>Restart</strong> to clear chat</span>
-    </div>
-</div>
+    <!-- Footer -->
+    <footer>
+        <div class="footer-links">
+            <a href="https://github.com/build-labz/Enterprise-AI-Vault" class="footer-link" target="_blank">GitHub</a>
+            <a href="#" class="footer-link" target="_blank">Live Demo</a>
+            <a href="#" class="footer-link">Documentation</a>
+            <a href="#" class="footer-link">0G Network</a>
+        </div>
+        <p>Built with ❤️ using 0G Storage, 0G Chain, and 0G AI Router</p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">© 2026 Enterprise AI Vault. MIT License.</p>
+    </footer>
 
-<script>
-    (function() {
-        "use strict";
-
-        // DOM refs
-        const messagesContainer = document.getElementById('chatMessages');
-        const emptyState = document.getElementById('emptyState');
-        const typingIndicator = document.getElementById('typingIndicator');
-        const userInput = document.getElementById('userInput');
+    <script>
+        // File Upload Functionality
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const onchainBadge = document.getElementById('onchainBadge');
+        const chatInput = document.getElementById('chatInput');
         const sendBtn = document.getElementById('sendBtn');
-        const restartBtn = document.getElementById('restartBtn');
 
-        let isProcessing = false;
+        let uploadedFile = null;
 
-        // --- scroll to bottom ---
-        function scrollToBottom() {
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
+        // Click to upload
+        uploadZone.addEventListener('click', () => {
+            fileInput.click();
+        });
 
-        // --- update empty state visibility ---
-        function updateEmptyState() {
-            const hasMessages = messagesContainer.querySelectorAll('.message').length > 0;
-            emptyState.style.display = hasMessages ? 'none' : 'flex';
-        }
+        // Drag and drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('drag-over');
+        });
 
-        // --- add a message bubble ---
-        function addMessage(text, sender) {
-            if (emptyState.style.display !== 'none') {
-                emptyState.style.display = 'none';
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('drag-over');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            // Validate file type
+            const validTypes = ['text/plain', 'text/markdown'];
+            const validExtensions = ['.txt', '.md'];
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!validTypes.includes(file.type) && !validExtensions.includes(fileExtension)) {
+                showStatus('Please upload a text file (.txt, .md)', 'error');
+                return;
             }
 
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${sender}`;
-
-            const avatar = document.createElement('div');
-            avatar.className = 'avatar';
-            avatar.innerHTML = sender === 'user' 
-                ? '<i class="fas fa-user"></i>' 
-                : '<i class="fas fa-robot"></i>';
-
-            const bubble = document.createElement('div');
-            bubble.className = 'bubble';
-            bubble.textContent = text;
-
-            msgDiv.appendChild(avatar);
-            msgDiv.appendChild(bubble);
-
-            // insert before typing indicator if visible
-            if (typingIndicator.style.display === 'flex') {
-                messagesContainer.insertBefore(msgDiv, typingIndicator);
-            } else {
-                messagesContainer.appendChild(msgDiv);
+            // Validate file size (10MB)
+            const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+            if (file.size > maxSize) {
+                showStatus('File size exceeds 10MB limit', 'error');
+                return;
             }
 
-            updateEmptyState();
-            scrollToBottom();
+            uploadedFile = file;
+            
+            // Display file info
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.classList.add('show');
+            
+            // Upload the file
+            uploadFile(file);
         }
+        
+        
 
-        // --- typing indicator ---
-        function showTyping(show) {
-            typingIndicator.style.display = show ? 'flex' : 'none';
-            if (show) {
-                messagesContainer.appendChild(typingIndicator);
-                scrollToBottom();
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Disable upload button or show loading state if you have one
+            const uploadBtn = document.getElementById('uploadBtn'); // Adjust selector as needed
+            if (uploadBtn) {
+                uploadBtn.disabled = true;
+                uploadBtn.textContent = 'Uploading...';
             }
-        }
-
-        // --- MANUAL RESET: clear all messages, keep empty state ---
-        function resetChat() {
-            // remove all .message elements
-            const allMessages = messagesContainer.querySelectorAll('.message');
-            allMessages.forEach(el => el.remove());
-
-            // hide typing
-            showTyping(false);
-
-            // show empty state
-            updateEmptyState();
-
-            // clear input & focus
-            userInput.value = '';
-            userInput.focus();
-
-            // enable send button & reset processing flag
-            sendBtn.disabled = false;
-            isProcessing = false;
-
-            // enable restart button (it's never disabled, but just in case)
-            restartBtn.disabled = false;
-        }
-
-        // --- handle send (user question) ---
-        async function handleSend() {
-            const rawText = userInput.value.trim();
-            if (!rawText) return;
-            if (isProcessing) return;
-
-            // Add user message
-            addMessage(rawText, 'user');
-            userInput.value = '';
-            userInput.focus();
-
-            // Show typing indicator
-            showTyping(true);
-            sendBtn.disabled = true;
-            isProcessing = true;
-            restartBtn.disabled = true;
 
             try {
-                // Send POST request to your API
-                const response = await fetch('/chat', {
+                showStatus('Uploading file...', 'info');
+                
+                const response = await fetch('/upload', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        text: rawText,
-                    })
+                    body: formData
+                    // Note: Don't set Content-Type header - let the browser set it with the boundary
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Upload failed');
                 }
 
                 const data = await response.json();
                 
-                // Hide typing indicator
-                showTyping(false);
+                // Handle successful upload with your backend response structure
+                showStatus('File uploaded successfully!', 'success');
                 
-                // Add assistant response
-                // Adjust based on your API response structure
-                const assistantMessage = data.response || data.message || data.text || JSON.stringify(data);
-                addMessage(assistantMessage, 'assistant');
-
-            } catch (error) {
-                console.error('API Error:', error);
-                showTyping(false);
-                addMessage('⚠️ Sorry, I encountered an error. Please try again.', 'assistant');
-            } finally {
+                // Log and display the response data
+                console.log('Upload successful!');
+                console.log('Filename:', data.filename);
+                console.log('File size:', data.size);
+                console.log('Total chunks:', data.total_chunks);
+                console.log('Root hash of chunk index:', data.root_hash_of_chunk_index);
+                console.log('All chunks data:', data.all_chunks_data);
+                
+                uploadStatus.textContent = '✓ Upload complete! Document stored and indexed.';
+                uploadStatus.className = 'upload-status show success';
+                onchainBadge.style.display = 'inline-flex';
+                
+                // Enable chat
+                chatInput.disabled = false;
                 sendBtn.disabled = false;
-                isProcessing = false;
-                restartBtn.disabled = false;
-                userInput.focus();
+                chatInput.placeholder = 'Ask a question about your document...';
+                chatInput.focus();                
+                // You can now process the chunk data
+                //processUploadResponse(data);
+                
+                return data;
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                showStatus(`Upload failed: ${error.message}`, 'error');
+                throw error;
+            } finally {
+                // Re-enable upload button
+                if (uploadBtn) {
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = 'Upload File'; // Adjust text as needed
+                }
             }
+        }     
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // --- EVENT LISTENERS ---
+        function simulateUpload() {
+            progressBar.classList.add('show');
+            uploadStatus.classList.add('show');
+            uploadStatus.textContent = 'Uploading to 0G Storage...';
+            uploadStatus.className = 'upload-status show';
 
-        // Send button
-        sendBtn.addEventListener('click', handleSend);
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    setTimeout(() => {
+                        uploadStatus.textContent = 'Encrypting and chunking...';
+                        
+                        setTimeout(() => {
+                            uploadStatus.textContent = 'Anchoring on 0G Chain...';
+                            
+                            setTimeout(() => {
+                                uploadStatus.textContent = '✓ Upload complete! Document stored and indexed.';
+                                uploadStatus.className = 'upload-status show success';
+                                onchainBadge.style.display = 'inline-flex';
+                                
+                                // Enable chat
+                                chatInput.disabled = false;
+                                sendBtn.disabled = false;
+                                chatInput.placeholder = 'Ask a question about your document...';
+                                chatInput.focus();
+                            }, 1000);
+                        }, 1500);
+                    }, 1000);
+                }
+                progressFill.style.width = progress + '%';
+            }, 200);
+        }
 
-        // Enter key
-        userInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
+        function showStatus(message, type) {
+            uploadStatus.textContent = message;
+            uploadStatus.className = `upload-status show ${type}`;
+            setTimeout(() => {
+                uploadStatus.classList.remove('show');
+            }, 3000);
+        }
+
+        // Chat Functionality
+        const chatMessages = document.getElementById('chatMessages');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !sendBtn.disabled) {
+                sendMessage();
+            }
+        });
+
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            chatInput.value = '';
+
+            // Show typing indicator
+            typingIndicator.classList.add('show');
+            sendBtn.disabled = true;
+            
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text: message,
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            const assistantMessage = data.response || data.message || data.text || JSON.stringify(data);
+            addMessage(assistantMessage, 'ai');
+            sendBtn.disabled = false;
+            typingIndicator.classList.remove('show');
+
+            // Simulate AI response
+            //~ setTimeout(() => {
+                //~ typingIndicator.classList.remove('show');
+                
+                //~ const responses = [
+                    //~ "Based on the document stored on 0G, I found relevant information. The document discusses enterprise-grade security measures for decentralized storage systems.",
+                    //~ "According to the encrypted chunks retrieved from 0G Storage, this topic is covered in section 3. The key points include encryption protocols and on-chain verification mechanisms.",
+                    //~ "I've searched through the semantically indexed chunks. The document mentions that all data is stored with Merkle proof verification on the 0G network.",
+                    //~ "From the document analysis: This system uses ECIES encryption for each chunk before storing on 0G, ensuring end-to-end security while maintaining searchability."
+                //~ ];
+                
+                //~ const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                //~ addMessage(randomResponse, 'ai');
+                
+                //~ sendBtn.disabled = false;
+            //~ }, 2000);
+        }
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message';
+            
+            const label = document.createElement('div');
+            label.className = 'message-label';
+            label.textContent = sender === 'user' ? 'You' : 'AI Assistant';
+            
+            const bubble = document.createElement('div');
+            bubble.className = `message-bubble message-${sender}`;
+            bubble.textContent = text;
+            
+            messageDiv.appendChild(label);
+            messageDiv.appendChild(bubble);
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                handleSend();
-            }
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
         });
 
-        // Restart button – manual reset
-        restartBtn.addEventListener('click', () => {
-            if (isProcessing) return; // safety
-            resetChat();
-            // also re-enable restart (it's already enabled, but keep)
-            restartBtn.disabled = false;
-            userInput.focus();
+        // Add parallax effect to glow elements
+        document.addEventListener('mousemove', (e) => {
+            const glows = document.querySelectorAll('.glow');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            glows.forEach((glow, index) => {
+                const speed = (index + 1) * 20;
+                const xOffset = (x - 0.5) * speed;
+                const yOffset = (y - 0.5) * speed;
+                glow.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+            });
         });
-
-        // Click on messages -> focus input
-        messagesContainer.addEventListener('click', () => {
-            userInput.focus();
-        });
-
-        // Init: clean start
-        window.addEventListener('load', () => {
-            resetChat();
-            userInput.focus();
-        });
-
-        // Extra: Escape key resets (optional, but we keep it as convenience)
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !isProcessing) {
-                resetChat();
-                userInput.focus();
-            }
-        });
-
-    })();
-</script>
+    </script>
 </body>
 </html>

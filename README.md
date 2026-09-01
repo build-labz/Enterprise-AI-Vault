@@ -175,7 +175,7 @@ PRIVATE_KEY=0xYOUR_KEY npx hardhat run scripts/deploy.js --network mainnet
 
 ## Video
 
-📺 [Youtube Video](https://www.youtube.com/watch?v=YhE2h9Fs-Mo)
+📺 [Youtube Video](https://www.youtube.com/watch?v=VjNwtLM4NgU)
 
 ## Public post
 
